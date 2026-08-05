@@ -1,0 +1,1041 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SerratedSound: Echoes of Light & Rhythm - Birthday Tribute to Neutronz</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            user-select: none;
+        }
+
+        body {
+            background-color: #08070d;
+            color: #ffffff;
+            font-family: 'Courier New', Courier, monospace;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            overflow: hidden;
+        }
+
+        #game-container {
+            position: relative;
+            width: 800px;
+            height: 450px;
+            background-color: #100e19;
+            border: 4px solid #3d355e;
+            box-shadow: 0 0 30px rgba(138, 43, 226, 0.3);
+            image-rendering: pixelated;
+            overflow: hidden;
+        }
+
+        canvas {
+            width: 100%;
+            height: 100%;
+            display: block;
+            image-rendering: pixelated;
+        }
+
+        /* HUD Overlay */
+        #hud {
+            position: absolute;
+            top: 15px;
+            left: 20px;
+            right: 20px;
+            display: flex;
+            justify-content: space-between;
+            pointer-events: none;
+            z-index: 10;
+        }
+
+        .hud-title {
+            font-size: 14px;
+            font-weight: bold;
+            color: #e0aaff;
+            text-shadow: 2px 2px #000;
+            letter-spacing: 1px;
+        }
+
+        .hud-prompt {
+            font-size: 12px;
+            color: #ffb703;
+            text-shadow: 1px 1px #000;
+            background: rgba(0, 0, 0, 0.6);
+            padding: 4px 8px;
+            border-radius: 4px;
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.4; }
+        }
+
+        /* Dialogue Box */
+        #dialogue-box {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 90%;
+            background: rgba(16, 14, 25, 0.95);
+            border: 2px solid #7b2cbf;
+            border-radius: 6px;
+            padding: 14px 18px;
+            z-index: 20;
+            display: none;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.8);
+        }
+
+        #dialogue-speaker {
+            font-size: 12px;
+            color: #ff79c6;
+            font-weight: bold;
+            margin-bottom: 6px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        #dialogue-text {
+            font-size: 13px;
+            line-height: 1.5;
+            color: #f8f8f2;
+            min-height: 38px;
+        }
+
+        #dialogue-hint {
+            font-size: 10px;
+            color: #6272a4;
+            text-align: right;
+            margin-top: 4px;
+        }
+
+        /* Rhythm Minigame Overlay */
+        #rhythm-ui {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 15;
+            display: none;
+            pointer-events: none;
+        }
+
+        .rhythm-bar-container {
+            position: absolute;
+            bottom: 60px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 320px;
+            height: 24px;
+            background: rgba(0,0,0,0.7);
+            border: 2px solid #ff79c6;
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .rhythm-target {
+            position: absolute;
+            left: 50%;
+            top: 0;
+            width: 40px;
+            height: 100%;
+            transform: translateX(-50%);
+            background: rgba(255, 121, 198, 0.4);
+            border-left: 2px solid #ff79c6;
+            border-right: 2px solid #ff79c6;
+        }
+
+        .rhythm-marker {
+            position: absolute;
+            top: 0;
+            width: 8px;
+            height: 100%;
+            background: #50fa7b;
+            box-shadow: 0 0 10px #50fa7b;
+        }
+
+        #rhythm-instructions {
+            position: absolute;
+            bottom: 95px;
+            width: 100%;
+            text-align: center;
+            font-size: 13px;
+            color: #f1fa8c;
+            font-weight: bold;
+            text-shadow: 2px 2px #000;
+        }
+
+        /* Ending Letter Screen */
+        #letter-screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #05040a;
+            z-index: 30;
+            display: none;
+            opacity: 0;
+            transition: opacity 2.5s ease;
+            padding: 30px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            align-items: center;
+            text-align: left;
+        }
+
+        #letter-container {
+            max-width: 680px;
+            margin: auto;
+        }
+
+        .letter-section {
+            background: rgba(20, 16, 35, 0.85);
+            border: 1px solid #7b2cbf;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            font-size: 13px;
+            line-height: 1.7;
+            color: #e2d9f3;
+            box-shadow: 0 0 15px rgba(123, 44, 191, 0.2);
+        }
+
+        .letter-title {
+            color: #ff79c6;
+            font-weight: bold;
+            font-size: 14px;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            border-bottom: 1px dashed #7b2cbf;
+            padding-bottom: 4px;
+        }
+
+        .heart {
+            color: #ff5555;
+            font-size: 16px;
+        }
+
+        #fade-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #000;
+            opacity: 0;
+            pointer-events: none;
+            z-index: 25;
+            transition: opacity 0.8s ease;
+        }
+
+        #controls-hint {
+            position: absolute;
+            bottom: 8px;
+            left: 20px;
+            font-size: 10px;
+            color: #6272a4;
+            pointer-events: none;
+            z-index: 10;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="game-container">
+        <canvas id="gameCanvas" width="800" height="450"></canvas>
+        
+        <div id="hud">
+            <div class="hud-title" id="scene-title">BACKSTAGE</div>
+            <div class="hud-prompt" id="hud-prompt">Walk Right ➔</div>
+        </div>
+
+        <div id="controls-hint">[A/D] or [◀/▶] Move | [SPACE] Interacts/Advance</div>
+
+        <div id="dialogue-box">
+            <div id="dialogue-speaker">CREW MEMBER</div>
+            <div id="dialogue-text">30 seconds to showtime, Neutronz! The crowd is going wild out there!</div>
+            <div id="dialogue-hint">Press SPACE to continue...</div>
+        </div>
+
+        <div id="rhythm-ui">
+            <div id="rhythm-instructions">DROP THE BEAT! Press SPACE on target!</div>
+            <div class="rhythm-bar-container">
+                <div class="rhythm-target"></div>
+                <div class="rhythm-marker" id="rhythm-marker"></div>
+            </div>
+        </div>
+
+        <div id="fade-overlay"></div>
+
+        <div id="letter-screen">
+            <div id="letter-container">
+                <div class="letter-section">
+                    <div class="letter-title">FROM MC QD TO NEUTRONZ</div>
+                    <div id="mc-qd-text"></div>
+                </div>
+                <div class="letter-section">
+                    <div class="letter-title">FROM BIANCA (YOUR DAUGHTER)</div>
+                    <div id="bianca-text"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- AUDIO ELEMENTS USING THE ACTUAL WAV FILES FROM THE songs FOLDER -->
+    <audio id="audio-rei" src="songs/444shawn, Neutronz - REI SEM TRONO (slowed).wav" preload="auto"></audio>
+    <audio id="audio-montagem" src="songs/MONTAGEM HOSTILE SLOWED.wav" preload="auto"></audio>
+    <audio id="audio-vaivai" src="songs/Neutronz, kxta. - VAI VAI GIRA (slowed).wav" preload="auto"></audio>
+
+    <script>
+        // ==========================================================================
+        // REAL AUDIO ENGINE
+        // ==========================================================================
+        class AudioController {
+            constructor() {
+                this.audioRei = document.getElementById('audio-rei');
+                this.audioMontagem = document.getElementById('audio-montagem');
+                this.audioVaivai = document.getElementById('audio-vaivai');
+                this.currentAudio = null;
+
+                this.ctx = null;
+            }
+
+            initSynth() {
+                if (!this.ctx) {
+                    this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+                }
+            }
+
+            stopAll() {
+                [this.audioRei, this.audioMontagem, this.audioVaivai].forEach(a => {
+                    if (a) {
+                        a.pause();
+                        a.currentTime = 0;
+                    }
+                });
+            }
+
+            playTrack(trackName) {
+                this.stopAll();
+                let targetAudio = null;
+
+                if (trackName.includes('REI SEM TRONO')) targetAudio = this.audioRei;
+                else if (trackName.includes('MONTAGEM')) targetAudio = this.audioMontagem;
+                else if (trackName.includes('VAI VAI GIRA')) targetAudio = this.audioVaivai;
+
+                if (targetAudio) {
+                    targetAudio.play().then(() => {
+                        this.currentAudio = targetAudio;
+                    }).catch(() => {
+                        this.currentAudio = null;
+                    });
+                }
+            }
+
+            playTone(freq, duration = 0.1) {
+                this.initSynth();
+                if (!this.ctx) return;
+                try {
+                    const osc = this.ctx.createOscillator();
+                    const gain = this.ctx.createGain();
+                    osc.frequency.setValueAtTime(freq, this.ctx.currentTime);
+                    gain.gain.setValueAtTime(0.08, this.ctx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + duration);
+                    osc.connect(gain);
+                    gain.connect(this.ctx.destination);
+                    osc.start();
+                    osc.stop(this.ctx.currentTime + duration);
+                } catch(e){}
+            }
+        }
+
+        const audio = new AudioController();
+
+        // ==========================================================================
+        // GAME ENGINE & STATE MANAGEMENT
+        // ==========================================================================
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+
+        const SCENES = {
+            BACKSTAGE: 0,
+            CONCERT_STAGE: 1,
+            LABEL_HQ: 2,
+            COLLAB_STUDIO: 3,
+            COLLAB_BLOWN_UP: 4,
+            HOME_FAMILY: 5,
+            AWARDS_NIGHT: 6,
+            FINAL_STAGE: 7
+        };
+
+        let currentState = SCENES.BACKSTAGE;
+        let dialogueIndex = 0;
+        let isDialogueActive = false;
+        let currentDialogueList = [];
+        let onDialogueComplete = null;
+
+        // Player Character (Neutronz)
+        const player = {
+            x: 100,
+            y: 310,
+            width: 24,
+            height: 52,
+            speed: 3,
+            facing: 'right',
+            animTimer: 0,
+            canMove: true
+        };
+
+        const keys = { left: false, right: false, space: false };
+
+        window.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') keys.left = true;
+            if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') keys.right = true;
+            if (e.key === ' ' || e.key === 'Enter') {
+                if (!keys.space) handleSpacePress();
+                keys.space = true;
+            }
+        });
+
+        window.addEventListener('keyup', (e) => {
+            if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') keys.left = false;
+            if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') keys.right = false;
+            if (e.key === ' ' || e.key === 'Enter') keys.space = false;
+        });
+
+        const particles = [];
+        function createParticles(x, y, count, color, speedScale = 1) {
+            for (let i = 0; i < count; i++) {
+                particles.push({
+                    x: x,
+                    y: y,
+                    vx: (Math.random() - 0.5) * 6 * speedScale,
+                    vy: (Math.random() - 0.8) * 6 * speedScale,
+                    color: color || `hsl(${Math.random() * 360}, 100%, 60%)`,
+                    size: Math.random() * 4 + 2,
+                    life: 1.0,
+                    decay: Math.random() * 0.02 + 0.015
+                });
+            }
+        }
+
+        let stageLightsAngle = 0;
+        let crowdJumpOffset = 0;
+        let crowdGenre = 'REI SEM TRONO';
+
+        // Story Dialogues
+        const sceneDialogues = {
+            backstage: [
+                { speaker: "STAGE MANAGER", text: "Neutronz! 10 seconds to showtime! The arena is completely sold out!" },
+                { speaker: "NEUTRONZ (YOU)", text: "Let's give them an unforgettable night. Time to represent SerratedSound." },
+                { speaker: "STAGE MANAGER", text: "Head out to the main stage booth when you're ready!" }
+            ],
+            concert: [
+                { speaker: "HYPED FAN 1", text: "NEUTRONZ!! PLAY 'REI SEM TRONO'!!" },
+                { speaker: "HYPED FAN 2", text: "DROP 'MONTAGEM HOSTILE' BRO!!" },
+                { speaker: "HYPED FAN 3", text: "WE NEED 'VAI VAI GIRA' TOO! DROP THE HEAT!!" },
+                { speaker: "NEUTRONZ (YOU)", text: "Say no more! Playing all three tracks tonight!" }
+            ],
+            labelHQ: [
+                { speaker: "SERRATEDSOUND NEWS", text: "SerratedSound Record Label is reaching millions of monthly listeners globally!" },
+                { speaker: "PRODUCER FRIEND", text: "Neutronz, SerratedSound has become a powerhouse. You've built an incredible team." },
+                { speaker: "NEUTRONZ (YOU)", text: "It was always about giving talented, underground artists a real platform." }
+            ],
+            collabStudio: [
+                { speaker: "MC QD", text: "Yo Neutronz! Thanks for meeting up with me man." },
+                { speaker: "MC QD", text: "I only have around 900 monthly listeners right now, but I brought this demo track..." },
+                { speaker: "MC QD", text: "I've always wanted to release under SerratedSound. Would you listen to it?" },
+                { speaker: "NEUTRONZ (YOU)", text: "(Listens to demo) Bro... this heat is insane! Let's polish this up and release it on SerratedSound!" }
+            ],
+            collabBlownUp: [
+                { speaker: "MC QD", text: "NEUTRONZ! CAN YOU BELIEVE THIS?!" },
+                { speaker: "MC QD", text: "It's only been 2 months since our release on SerratedSound..." },
+                { speaker: "MC QD", text: "OUR TRACK IS ALMOST AT 100,000 STREAMS! AND MY MONTHLY LISTENERS ARE EXPLODING!" },
+                { speaker: "NEUTRONZ (YOU)", text: "I told you, QD! Quality sound always finds its way. So proud of you!" }
+            ],
+            homeFamily: [
+                { speaker: "WIFE", text: "Welcome home! Happy Birthday, handsome!" },
+                { speaker: "BIANCA (DAUGHTER)", text: "Happy Birthday, Dad! We saved the biggest slice of cake for you!" },
+                { speaker: "NEUTRONZ (YOU)", text: "Thanks my loves. No matter how big SerratedSound gets, this right here is my world." }
+            ],
+            awardsNight: [
+                { speaker: "AWARD ANNOUNCER", text: "And the Record Label Founder & Producer of the Year goes to... NEUTRONZ!" },
+                { speaker: "NEUTRONZ (YOU)", text: "Thank you to SerratedSound, MC QD, all our listeners, and my amazing family!" }
+            ],
+            finalStage: [
+                { speaker: "NARRATOR", text: "As the golden spotlights softly dim and the stadium cheers fade into memory..." },
+                { speaker: "NARRATOR", text: "The greatest legacy is the dreams you helped build and the family who loves you." }
+            ]
+        };
+
+        // ==========================================================================
+        // DIALOGUE SYSTEM
+        // ==========================================================================
+        function startDialogue(list, onComplete) {
+            currentDialogueList = list;
+            dialogueIndex = 0;
+            isDialogueActive = true;
+            onDialogueComplete = onComplete;
+            player.canMove = false;
+            document.getElementById('dialogue-box').style.display = 'block';
+            showCurrentDialogueLine();
+        }
+
+        function showCurrentDialogueLine() {
+            const current = currentDialogueList[dialogueIndex];
+            document.getElementById('dialogue-speaker').innerText = current.speaker;
+            document.getElementById('dialogue-text').innerText = current.text;
+            audio.playTone(440, 0.05);
+        }
+
+        function handleSpacePress() {
+            if (isDialogueActive) {
+                dialogueIndex++;
+                if (dialogueIndex < currentDialogueList.length) {
+                    showCurrentDialogueLine();
+                } else {
+                    isDialogueActive = false;
+                    document.getElementById('dialogue-box').style.display = 'none';
+                    player.canMove = true;
+                    if (onDialogueComplete) onDialogueComplete();
+                }
+            } else if (isRhythmActive) {
+                checkRhythmHit();
+            } else {
+                checkInteraction();
+            }
+        }
+
+        // ==========================================================================
+        // RHYTHM MINIGAME LOGIC
+        // ==========================================================================
+        let isRhythmActive = false;
+        let rhythmMarkerPos = 0;
+        let rhythmSpeed = 4;
+        let rhythmHits = 0;
+        const requiredHits = 3;
+        const trackList = [
+            'REI SEM TRONO',
+            'MONTAGEM HOSTILE',
+            'VAI VAI GIRA'
+        ];
+        let currentTrackIndex = 0;
+
+        function startRhythmMinigame() {
+            isRhythmActive = true;
+            player.canMove = false;
+            rhythmHits = 0;
+            currentTrackIndex = 0;
+            document.getElementById('rhythm-ui').style.display = 'block';
+            updateRhythmGenre();
+        }
+
+        function updateRhythmGenre() {
+            crowdGenre = trackList[currentTrackIndex];
+            audio.playTrack(crowdGenre);
+            document.getElementById('rhythm-instructions').innerText = `NOW PLAYING: ${crowdGenre} (${rhythmHits}/${requiredHits})`;
+        }
+
+        function updateRhythmMarker() {
+            if (!isRhythmActive) return;
+            rhythmMarkerPos += rhythmSpeed;
+            if (rhythmMarkerPos > 310 || rhythmMarkerPos < 0) {
+                rhythmSpeed = -rhythmSpeed;
+            }
+            document.getElementById('rhythm-marker').style.left = rhythmMarkerPos + 'px';
+        }
+
+        function checkRhythmHit() {
+            if (rhythmMarkerPos >= 130 && rhythmMarkerPos <= 190) {
+                rhythmHits++;
+                createParticles(400, 200, 30, '#50fa7b', 2);
+                audio.playTone(880, 0.2);
+                
+                if (currentTrackIndex < trackList.length - 1) {
+                    currentTrackIndex++;
+                }
+
+                if (rhythmHits >= requiredHits) {
+                    isRhythmActive = false;
+                    document.getElementById('rhythm-ui').style.display = 'none';
+                    audio.stopAll();
+                    createParticles(400, 150, 100, '#ff79c6', 3);
+                    startDialogue([
+                        { speaker: "CROWD", text: "SERRATEDSOUND TAKEOVER!! NEUTRONZ! NEUTRONZ!" },
+                        { speaker: "NEUTRONZ (YOU)", text: "Thank you everyone! Keep supporting SerratedSound!" }
+                    ], () => {
+                        fadeToScene(SCENES.LABEL_HQ);
+                    });
+                } else {
+                    updateRhythmGenre();
+                }
+            } else {
+                audio.playTone(150, 0.1);
+            }
+        }
+
+        // ==========================================================================
+        // SCENE TRANSITIONS
+        // ==========================================================================
+        function fadeToScene(nextScene) {
+            player.canMove = false;
+            const overlay = document.getElementById('fade-overlay');
+            overlay.style.opacity = '1';
+
+            setTimeout(() => {
+                currentState = nextScene;
+                setupScene(nextScene);
+                overlay.style.opacity = '0';
+                player.canMove = true;
+            }, 900);
+        }
+
+        function setupScene(scene) {
+            particles.length = 0;
+            player.x = 80;
+
+            if (scene === SCENES.BACKSTAGE) {
+                document.getElementById('scene-title').innerText = "BACKSTAGE - SERRATEDSOUND TOUR";
+                document.getElementById('hud-prompt').innerText = "Walk Right ➔";
+                startDialogue(sceneDialogues.backstage, null);
+            } else if (scene === SCENES.CONCERT_STAGE) {
+                document.getElementById('scene-title').innerText = "LIVE ARENA - NEUTRONZ ON STAGE";
+                document.getElementById('hud-prompt').innerText = "Walk to DJ Booth";
+            } else if (scene === SCENES.LABEL_HQ) {
+                document.getElementById('scene-title').innerText = "SERRATEDSOUND HQ";
+                document.getElementById('hud-prompt').innerText = "Explore & Walk Right ➔";
+                startDialogue(sceneDialogues.labelHQ, null);
+            } else if (scene === SCENES.COLLAB_STUDIO) {
+                document.getElementById('scene-title').innerText = "SERRATEDSOUND STUDIO - DEMO SESSION";
+                document.getElementById('hud-prompt').innerText = "Talk to MC QD ➔";
+                startDialogue(sceneDialogues.collabStudio, null);
+            } else if (scene === SCENES.COLLAB_BLOWN_UP) {
+                document.getElementById('scene-title').innerText = "SERRATEDSOUND STUDIO - 2 MONTHS LATER";
+                document.getElementById('hud-prompt').innerText = "Celebrate with MC QD ➔";
+                startDialogue(sceneDialogues.collabBlownUp, null);
+            } else if (scene === SCENES.HOME_FAMILY) {
+                document.getElementById('scene-title').innerText = "HOME - WITH WIFE & BIANCA";
+                document.getElementById('hud-prompt').innerText = "Walk to Family";
+                startDialogue(sceneDialogues.homeFamily, null);
+            } else if (scene === SCENES.AWARDS_NIGHT) {
+                document.getElementById('scene-title').innerText = "GLOBAL MUSIC AWARDS";
+                document.getElementById('hud-prompt').innerText = "Walk Right ➔";
+                startDialogue(sceneDialogues.awardsNight, null);
+            } else if (scene === SCENES.FINAL_STAGE) {
+                document.getElementById('scene-title').innerText = "THE FINAL TRIBUTE";
+                document.getElementById('hud-prompt').innerText = "Stand Center Stage";
+                startDialogue(sceneDialogues.finalStage, () => {
+                    setTimeout(triggerEndingLetter, 1500);
+                });
+            }
+        }
+
+        function checkInteraction() {
+            if (currentState === SCENES.BACKSTAGE && player.x > 680) {
+                fadeToScene(SCENES.CONCERT_STAGE);
+            } else if (currentState === SCENES.CONCERT_STAGE && player.x >= 360 && player.x <= 440 && !isRhythmActive) {
+                startDialogue(sceneDialogues.concert, () => {
+                    startRhythmMinigame();
+                });
+            } else if (currentState === SCENES.LABEL_HQ && player.x > 680) {
+                fadeToScene(SCENES.COLLAB_STUDIO);
+            } else if (currentState === SCENES.COLLAB_STUDIO && player.x > 680) {
+                fadeToScene(SCENES.COLLAB_BLOWN_UP);
+            } else if (currentState === SCENES.COLLAB_BLOWN_UP && player.x > 680) {
+                fadeToScene(SCENES.HOME_FAMILY);
+            } else if (currentState === SCENES.HOME_FAMILY && player.x > 680) {
+                fadeToScene(SCENES.AWARDS_NIGHT);
+            } else if (currentState === SCENES.AWARDS_NIGHT && player.x > 680) {
+                fadeToScene(SCENES.FINAL_STAGE);
+            }
+        }
+
+        // ==========================================================================
+        // DETAILED PIXEL ART RENDERING (MATCHED QUALITY FOR ALL CHARACTERS)
+        // ==========================================================================
+        function drawPixelRect(x, y, w, h, color) {
+            ctx.fillStyle = color;
+            ctx.fillRect(Math.floor(x), Math.floor(y), Math.floor(w), Math.floor(h));
+        }
+
+        function drawCharacter(x, y, facing, frame, type = 'neutronz') {
+            const bounce = Math.sin(frame * 0.3) * 2;
+            
+            if (type === 'neutronz') {
+                // Main Producer - Neutronz
+                drawPixelRect(x + 4, y + 36, 6, 16, '#1d1e2c'); // Pants
+                drawPixelRect(x + 14, y + 36, 6, 16, '#1d1e2c');
+                drawPixelRect(x + 2, y + 48, 8, 4, '#ffffff');  // Sneakers
+                drawPixelRect(x + 14, y + 48, 8, 4, '#ffffff');
+                drawPixelRect(x + 2, y + 18 + bounce, 20, 20, '#7b2cbf'); // Purple Serrated Jacket
+                drawPixelRect(x + 6, y + 20 + bounce, 12, 16, '#240046');
+                drawPixelRect(x + 4, y + 4 + bounce, 16, 14, '#ffdbac'); // Face
+                drawPixelRect(x + 4, y + 12 + bounce, 16, 6, '#3a2e2b'); // Beard Trim
+                drawPixelRect(x + 2, y + 2 + bounce, 20, 5, '#2b1e1a');  // Hair
+                drawPixelRect(x + 2, y + 2 + bounce, 4, 12, '#ffb703');  // Studio Headphones
+                drawPixelRect(x + 18, y + 2 + bounce, 4, 12, '#ffb703');
+                drawPixelRect(x + 4, y + 0 + bounce, 16, 3, '#ffb703');
+            } else if (type === 'mcqd') {
+                // High-Detail MC QD Character
+                drawPixelRect(x + 4, y + 36, 6, 16, '#111827'); // Black Cargo Pants
+                drawPixelRect(x + 14, y + 36, 6, 16, '#111827');
+                drawPixelRect(x + 2, y + 48, 8, 4, '#ef4444');  // Red Kicks
+                drawPixelRect(x + 14, y + 48, 8, 4, '#ef4444');
+                drawPixelRect(x + 2, y + 18 + bounce, 20, 20, '#dc2626'); // Red Oversized Hoodie
+                drawPixelRect(x + 8, y + 22 + bounce, 8, 12, '#991b1b');
+                drawPixelRect(x + 4, y + 4 + bounce, 16, 14, '#f87171'); // Face
+                drawPixelRect(x + 0, y + 2 + bounce, 24, 6, '#1e293b');  // Backwards Snapback Cap
+                drawPixelRect(x + 18, y + 6 + bounce, 6, 3, '#1e293b');  // Cap Brim
+            } else if (type === 'wife') {
+                // High-Detail Wife Character
+                drawPixelRect(x + 4, y + 34, 16, 16, '#312e81'); // Skirt
+                drawPixelRect(x + 6, y + 46, 4, 6, '#ffdbac');   // Legs
+                drawPixelRect(x + 14, y + 46, 4, 6, '#ffdbac');
+                drawPixelRect(x + 2, y + 16 + bounce, 20, 18, '#f43f5e'); // Elegant Top
+                drawPixelRect(x + 4, y + 2 + bounce, 16, 14, '#ffe0bd');  // Face
+                drawPixelRect(x + 0, y + 0 + bounce, 24, 22, '#451a03');  // Long Flowing Hair
+            } else if (type === 'bianca') {
+                // High-Detail Daughter Bianca
+                drawPixelRect(x + 4, y + 34, 6, 16, '#1e1b4b'); // Stylish Jeans
+                drawPixelRect(x + 14, y + 34, 6, 16, '#1e1b4b');
+                drawPixelRect(x + 2, y + 48, 8, 4, '#10b981');  // Green High-Tops
+                drawPixelRect(x + 14, y + 48, 8, 4, '#10b981');
+                drawPixelRect(x + 2, y + 16 + bounce, 20, 18, '#8b5cf6'); // Purple Crop Sweater
+                drawPixelRect(x + 4, y + 2 + bounce, 16, 14, '#ffe0bd');  // Face
+                drawPixelRect(x + 0, y + 0 + bounce, 24, 18, '#0f172a');  // Dark Hair with Waves
+            }
+        }
+
+        // Scene Renderers
+        function renderBackstage() {
+            drawPixelRect(0, 0, 800, 450, '#0a0812');
+            for (let i = 0; i < 800; i += 80) {
+                drawPixelRect(i, 0, 8, 360, '#1d192b');
+                drawPixelRect(i, 100, 80, 6, '#1d192b');
+            }
+            drawPixelRect(140, 310, 50, 50, '#2b2638');
+            drawPixelRect(142, 312, 46, 46, '#1a1724');
+            drawPixelRect(140, 310, 6, 6, '#ffb703');
+            drawPixelRect(184, 310, 6, 6, '#ffb703');
+
+            drawPixelRect(500, 290, 60, 70, '#2b2638');
+
+            const beamGlow = Math.sin(Date.now() * 0.005) * 0.2 + 0.6;
+            ctx.fillStyle = `rgba(255, 0, 128, ${beamGlow * 0.3})`;
+            ctx.beginPath();
+            ctx.moveTo(700, 160);
+            ctx.lineTo(800, 100);
+            ctx.lineTo(800, 360);
+            ctx.lineTo(700, 360);
+            ctx.fill();
+
+            drawPixelRect(700, 160, 100, 200, '#ff007f');
+            drawPixelRect(710, 170, 80, 190, '#ffd166');
+
+            drawCharacter(640, 308, 'left', Math.sin(Date.now() * 0.003), 'wife');
+        }
+
+        function renderConcertStage() {
+            drawPixelRect(0, 0, 800, 450, '#05030a');
+
+            stageLightsAngle += 0.02;
+            const colors = ['rgba(255,0,110,0.15)', 'rgba(0,245,212,0.15)', 'rgba(157,78,221,0.15)'];
+            for (let i = 0; i < 5; i++) {
+                ctx.fillStyle = colors[i % colors.length];
+                ctx.beginPath();
+                ctx.moveTo(160 + i * 120, 0);
+                ctx.lineTo(160 + i * 120 + Math.sin(stageLightsAngle + i) * 150 - 50, 360);
+                ctx.lineTo(160 + i * 120 + Math.sin(stageLightsAngle + i) * 150 + 50, 360);
+                ctx.fill();
+            }
+
+            drawPixelRect(350, 290, 100, 70, '#10002b');
+            drawPixelRect(355, 295, 90, 5, '#e0aaff');
+            drawPixelRect(370, 275, 20, 15, '#3a0ca3');
+            drawPixelRect(372, 277, 16, 11, '#4cc9f0');
+            drawPixelRect(405, 282, 18, 8, '#ffb703');
+
+            crowdJumpOffset = Math.sin(Date.now() * 0.01) * 6;
+            ctx.fillStyle = '#0a0014';
+            ctx.fillRect(0, 360, 800, 90);
+
+            for (let x = 10; x < 800; x += 18) {
+                const jump = Math.sin(Date.now() * 0.012 + x) * 5;
+                ctx.fillStyle = '#140029';
+                ctx.beginPath();
+                ctx.arc(x, 370 + jump, 10, 0, Math.PI * 2);
+                ctx.fill();
+
+                if (x % 36 === 0) {
+                    ctx.strokeStyle = (x % 72 === 0) ? '#00f5d4' : '#ff007f';
+                    ctx.lineWidth = 3;
+                    ctx.beginPath();
+                    ctx.moveTo(x, 365 + jump);
+                    ctx.lineTo(x + 6, 345 + jump);
+                    ctx.stroke();
+                }
+            }
+
+            if (isRhythmActive) {
+                ctx.fillStyle = '#ff79c6';
+                ctx.font = 'bold 12px Courier New';
+                ctx.fillText(`PLAYING: ${crowdGenre}`, 220, 50);
+            }
+        }
+
+        function renderLabelHQ() {
+            drawPixelRect(0, 0, 800, 450, '#13111c');
+
+            ctx.fillStyle = '#ff79c6';
+            ctx.font = 'bold 20px Courier New';
+            ctx.fillText("SERRATEDSOUND HQ", 300, 50);
+
+            for (let i = 0; i < 4; i++) {
+                ctx.fillStyle = '#ffb703';
+                ctx.beginPath();
+                ctx.arc(150 + i * 140, 120, 22, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.fillStyle = '#000000';
+                ctx.beginPath();
+                ctx.arc(150 + i * 140, 120, 8, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.strokeStyle = '#e0aaff';
+                ctx.lineWidth = 2;
+                ctx.strokeRect(120 + i * 140, 90, 60, 60);
+            }
+
+            drawPixelRect(480, 280, 180, 80, '#211f30');
+            for (let bx = 490; bx < 650; bx += 12) {
+                drawPixelRect(bx, 290, 4, 40, '#353248');
+                drawPixelRect(bx, 310 + Math.sin(bx) * 10, 4, 6, '#50fa7b');
+            }
+        }
+
+        function renderCollabStudio() {
+            drawPixelRect(0, 0, 800, 450, '#0f172a');
+
+            // Initial Pitch Analytics
+            drawPixelRect(240, 70, 320, 130, '#1e293b');
+            drawPixelRect(245, 75, 310, 120, '#0f172a');
+            ctx.fillStyle = '#38bdf8';
+            ctx.font = 'bold 14px Courier New';
+            ctx.fillText("ARTIST PITCH: MC QD", 310, 100);
+            ctx.fillStyle = '#f87171';
+            ctx.fillText("MONTHLY LISTENERS: 900", 300, 130);
+            ctx.fillStyle = '#4ade80';
+            ctx.fillText("DEMO TRACK: ELA COMANDA", 270, 160);
+
+            drawPixelRect(550, 280, 120, 80, '#334155');
+            drawPixelRect(100, 290, 80, 70, '#334155');
+
+            drawCharacter(500, 308, 'left', Math.sin(Date.now() * 0.003), 'mcqd');
+        }
+
+        function renderCollabBlownUp() {
+            drawPixelRect(0, 0, 800, 450, '#0f172a');
+
+            // 2 Months Later Blown Up Analytics
+            drawPixelRect(200, 60, 400, 150, '#1e293b');
+            drawPixelRect(205, 65, 390, 140, '#0f172a');
+            ctx.fillStyle = '#f59e0b';
+            ctx.font = 'bold 16px Courier New';
+            ctx.fillText("2 MONTHS LATER...", 320, 90);
+            ctx.fillStyle = '#38bdf8';
+            ctx.fillText("SERRATEDSOUND RELEASE STATS:", 250, 120);
+            ctx.fillStyle = '#4ade80';
+            ctx.font = 'bold 18px Courier New';
+            ctx.fillText("TOTAL STREAMS: 99,842 / 100K! 🔥", 220, 155);
+            ctx.fillStyle = '#a855f7';
+            ctx.fillText("MC QD MONTHLY LISTENERS: 50,000!", 220, 185);
+
+            // Celebration Confetti
+            if (Math.random() < 0.2) {
+                createParticles(400, 100, 5, '#50fa7b', 1);
+            }
+
+            drawPixelRect(550, 280, 120, 80, '#334155');
+            drawPixelRect(100, 290, 80, 70, '#334155');
+
+            drawCharacter(500, 308, 'left', Math.sin(Date.now() * 0.003), 'mcqd');
+        }
+
+        function renderHomeFamily() {
+            drawPixelRect(0, 0, 800, 450, '#2b1e1a');
+
+            drawPixelRect(350, 240, 100, 120, '#4a3525');
+            drawPixelRect(370, 280, 60, 80, '#1a0f0a');
+            const flameH = Math.random() * 20 + 20;
+            drawPixelRect(385, 360 - flameH, 30, flameH, '#ffb703');
+            drawPixelRect(392, 360 - flameH + 8, 16, flameH - 8, '#ff007f');
+
+            drawPixelRect(120, 300, 140, 60, '#9b2226');
+            drawPixelRect(110, 290, 20, 70, '#ae2012');
+            drawPixelRect(250, 290, 20, 70, '#ae2012');
+
+            ctx.fillStyle = '#ffb703';
+            ctx.font = 'bold 14px Courier New';
+            ctx.fillText("HAPPY BIRTHDAY NEUTRONZ! 🎉", 280, 100);
+
+            drawCharacter(300, 308, 'left', Math.sin(Date.now() * 0.002), 'wife');
+            drawCharacter(260, 308, 'right', Math.sin(Date.now() * 0.004), 'bianca');
+        }
+
+        function renderAwardsNight() {
+            drawPixelRect(0, 0, 800, 450, '#08040c');
+            drawPixelRect(0, 350, 800, 10, '#d90429');
+
+            ctx.fillStyle = 'rgba(255, 215, 0, 0.12)';
+            ctx.beginPath();
+            ctx.moveTo(400, 0);
+            ctx.lineTo(250, 360);
+            ctx.lineTo(550, 360);
+            ctx.fill();
+
+            drawPixelRect(385, 180, 30, 120, '#ffb703');
+            ctx.fillStyle = '#ffe3a8';
+            ctx.beginPath(); ctx.arc(400, 160, 25, 0, Math.PI * 2); ctx.fill();
+
+            if (Math.random() < 0.1) {
+                const flashX = Math.random() * 800;
+                const flashY = Math.random() * 300;
+                ctx.fillStyle = 'rgba(255,255,255,0.8)';
+                ctx.beginPath();
+                ctx.arc(flashX, flashY, Math.random() * 30 + 10, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+
+        function renderFinalStage() {
+            drawPixelRect(0, 0, 800, 450, '#030206');
+
+            const glowGrad = ctx.createRadialGradient(400, 320, 10, 400, 320, 180);
+            glowGrad.addColorStop(0, 'rgba(255, 215, 0, 0.35)');
+            glowGrad.addColorStop(1, 'rgba(3, 2, 6, 0)');
+            ctx.fillStyle = glowGrad;
+            ctx.beginPath();
+            ctx.arc(400, 320, 180, 0, Math.PI * 2);
+            ctx.fill();
+
+            if (Math.random() < 0.3) {
+                particles.push({
+                    x: Math.random() * 800,
+                    y: 450,
+                    vx: (Math.random() - 0.5) * 0.5,
+                    vy: -Math.random() * 1.5 - 0.5,
+                    color: '#ffe3a8',
+                    size: Math.random() * 3 + 1,
+                    life: 1.0,
+                    decay: 0.008
+                });
+            }
+        }
+
+        function renderGround() {
+            drawPixelRect(0, 360, 800, 90, '#151324');
+            drawPixelRect(0, 360, 800, 4, '#3d355e');
+        }
+
+        // ==========================================================================
+        // MAIN GAME LOOP
+        // ==========================================================================
+        function update() {
+            if (player.canMove) {
+                if (keys.left && player.x > 10) {
+                    player.x -= player.speed;
+                    player.facing = 'left';
+                    player.animTimer++;
+                } else if (keys.right && player.x < 760) {
+                    player.x += player.speed;
+                    player.facing = 'right';
+                    player.animTimer++;
+                } else {
+                    player.animTimer = 0;
+                }
+            }
+
+            updateRhythmMarker();
+
+            for (let i = particles.length - 1; i >= 0; i--) {
+                const p = particles[i];
+                p.x += p.vx;
+                p.y += p.vy;
+                p.life -= p.decay;
+                if (p.life <= 0) {
+                    particles.splice(i, 1);
+                }
+            }
+        }
+
+        function render() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            switch (currentState) {
+                case SCENES.BACKSTAGE: renderBackstage(); break;
+                case SCENES.CONCERT_STAGE: renderConcertStage(); break;
+                case SCENES.LABEL_HQ: renderLabelHQ(); break;
+                case SCENES.COLLAB_STUDIO: renderCollabStudio(); break;
+                case SCENES.COLLAB_BLOWN_UP: renderCollabBlownUp(); break;
+                case SCENES.HOME_FAMILY: renderHomeFamily(); break;
+                case SCENES.AWARDS_NIGHT: renderAwardsNight(); break;
+                case SCENES.FINAL_STAGE: renderFinalStage(); break;
+            }
+
+            renderGround();
+
+            drawCharacter(player.x, player.y, player.facing, player.animTimer, 'neutronz');
+
+            particles.forEach(p => {
+                ctx.fillStyle = p.color;
+                ctx.globalAlpha = Math.max(0, p.life);
+                ctx.fillRect(Math.floor(p.x), Math.floor(p.y), Math.floor(p.size), Math.floor(p.size));
+                ctx.globalAlpha = 1.0;
+            });
+        }
+
+        function gameLoop() {
+            update();
+            render();
+            requestAnimationFrame(gameLoop);
+        }
+
+        // ==========================================================================
+        // ENDING TRIBUTE LETTERS & CREDITS
+        // ==========================================================================
+        function triggerEndingLetter() {
+            const letterScreen = document.getElementById('letter-screen');
+            const mcQdText = document.getElementById('mc-qd-text');
+            const biancaText = document.getElementById('bianca-text');
+            
+            letterScreen.style.display = 'flex';
+            setTimeout(() => { letterScreen.style.opacity = '1'; }, 100);
+
+            mcQdText.innerHTML = 
+`Brother, you don't even know how much everything has changed in these past few months, and a major portion of it is all because of you. Thank you from the bottom of my heart for transforming everything for me. 
+
+I started at 14 monthly listeners, and now I'm at 50,000 monthly listeners—a number my past self would have fainted seeing! 
+
+Much love, and HAPPY BIRTHDAY UNC! Bro's pushing 40... wow, time to go to bed soon! 😄`;
+
+            biancaText.innerHTML = 
+`Happy birthday, Dad! I hope more people continue to notice your talent and the immense dedication you put into your work. 
+
+Thank you for being my father and for always being there for me when I needed you the most. You're awesome sauce! Please don't go fully bald! <span class="heart">♥</span>`;
+        }
+
+        // Initialize Game
+        setupScene(SCENES.BACKSTAGE);
+        requestAnimationFrame(gameLoop);
+    </script>
+</body>
+</html>
